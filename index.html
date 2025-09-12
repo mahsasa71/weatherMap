@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Weather Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="styles.css">
+     <link rel="stylesheet" href="assets/css/fontello.css" />
+</head>
+<body>
+  <div id="map"></div>
+  <div class="sidebar">
+    <h3>Select Country</h3>
+    <div class="custom-dropdown">
+      <div class="selected">choose</div>
+      <div class="options">
+        <div data-value="IR">Iran</div>
+        <div data-value="TR">Turkey</div>
+        <div data-value="US">United States</div>
+        <div data-value="GB">United Kingdom</div>
+        <div data-value="FR">France</div>
+        <div data-value="DE">Germany</div>
+        <div data-value="JP">Japan</div>
+        <div data-value="CN">China</div>
+        <div data-value="IN">India</div>
+        <div data-value="BR">Brazil</div>
+        <div data-value="CA">Canada</div>
+        <div data-value="AU">Australia</div>
+        <div data-value="IT">Italy</div>
+        <div data-value="ES">Spain</div>
+        <div data-value="MX">Mexico</div>
+        <div data-value="RU">Russia</div>
+        <div data-value="ZA">South Africa</div>
+        <div data-value="EG">Egypt</div>
+        <div data-value="AR">Argentina</div>
+        <div data-value="SA">Saudi Arabia</div>
+        <div data-value="KR">South Korea</div>
+      </div>
+    </div>
+    <div id="cards"></div>
+  </div>
+
+
+      <div class="mahsa">
+          <div class="circle">
+            <img src="https://avatars.githubusercontent.com/u/139154451?v=4" alt="" />
+          </div>
+          <a href="https://github.com/mahsasa71"
+            ><i class="icon-github-circled"></i
+          ></a>
+          <a href="https://www.instagram.com/mahsacodes?igsh=b3o4NXE4d25tYmli"
+            ><i class="icon-instagram"></i
+          ></a>
+          <a
+            href="https://www.linkedin.com/in/mahsa-sahraei?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app"
+            ><i class="icon-linkedin"></i
+          ></a>
+          <a href="mailto:sahraee.mse@gmail.com"><i class="icon-mail"></i></a>
+        </div>
+
+  <script>
+    const map = L.map('map').setView([32.4279, 53.688], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    const API_KEY = "bf99c44ba91d6457d336f6792ba2a2fc";
+    let cityList = [];
+
+    async function loadCityList() {
+      const res = await fetch('cities.json');
+      cityList = await res.json();
+    }
+
+    function getCitiesByCountry(code, limit = 30) {
+      let filtered = cityList.filter(city => city.country === code);
+      if (code === "IR") {
+        const importantIranCities = ["Tehran", "Tabriz", "Isfahan", "Qom", "Arāk"];
+        const importantCities = filtered.filter(city =>
+          importantIranCities.includes(city.name)
+        );
+        const otherCities = filtered.filter(city => !importantIranCities.includes(city.name));
+        filtered = [...importantCities, ...otherCities];
+      }
+      return filtered.slice(0, limit);
+    }
+
+    async function loadWeather(cities) {
+      const results = [];
+      for (let city of cities) {
+        try {
+          const url = `https://api.openweathermap.org/data/2.5/weather?lat=${city.lat}&lon=${city.lng}&appid=${API_KEY}&units=metric&lang=en`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data.cod === 200) results.push(data);
+        } catch (err) {
+          console.error(`Error fetching city ${city.name}:`, err);
+        }
+      }
+      return results;
+    }
+
+    function renderCards(cities) {
+      const cards = document.getElementById("cards");
+      cards.innerHTML = "";
+      cities.forEach(city => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div>
+            <img src="https://openweathermap.org/img/wn/${city.weather[0].icon}@2x.png" />
+            <h4>${city.name}</h4>
+            <p>${city.main.temp}°C - ${city.weather[0].description}</p>
+          </div>
+        `;
+        card.addEventListener("click", () => {
+          L.popup()
+            .setLatLng([city.coord.lat, city.coord.lon])
+            .setContent(`
+              <h3>${city.name}</h3>
+              <p>Temp: ${city.main.temp}°C</p>
+              <p>${city.weather[0].description}</p>
+            `)
+            .openOn(map);
+          map.setView([city.coord.lat, city.coord.lon], 7);
+        });
+        cards.appendChild(card);
+      });
+    }
+
+    async function updateCountry(code) {
+      const cities = getCitiesByCountry(code, 30);
+      const weatherData = await loadWeather(cities);
+      renderCards(weatherData);
+      if (weatherData.length > 0) {
+        const firstCity = weatherData[0];
+        map.setView([firstCity.coord.lat, firstCity.coord.lon], 5);
+      }
+    }
+
+    const dropdown = document.querySelector('.custom-dropdown');
+    const selected = dropdown.querySelector('.selected');
+    const optionsContainer = dropdown.querySelector('.options');
+    const optionsList = optionsContainer.querySelectorAll('div');
+
+    selected.addEventListener('click', () => {
+      optionsContainer.style.display = optionsContainer.style.display === 'block' ? 'none' : 'block';
+    });
+
+    optionsList.forEach(option => {
+      option.addEventListener('click', () => {
+        selected.textContent = option.textContent;
+        optionsContainer.style.display = 'none';
+        updateCountry(option.getAttribute('data-value'));
+      });
+    });
+
+    document.addEventListener('click', function(event) {
+      if (!dropdown.contains(event.target)) {
+        optionsContainer.style.display = 'none';
+      }
+    });
+
+    window.addEventListener("load", async () => {
+      await loadCityList();
+      updateCountry("IR");
+    });
+  </script>
+</body>
+</html>

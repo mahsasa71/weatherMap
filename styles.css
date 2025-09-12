@@ -1,0 +1,195 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html, body {
+  overflow-x: hidden;
+  font-family: sans-serif;
+  height: 100%;
+}
+body { display: flex; }
+#map { width: 75%; height: 100vh; }
+.sidebar {
+  width: 25%;
+  height: 100vh;
+  overflow-y: auto;
+  background: #f9f9f9;
+  padding: 10px;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+}
+.card {
+  background: white;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.card:hover { transform: scale(1.03); }
+.card img { width: 50px; height: 50px; }
+.custom-dropdown {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  user-select: none;
+  margin-bottom: 15px;
+}
+.custom-dropdown .selected {
+  background: white;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+.custom-dropdown .options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+  display: none;
+  z-index: 1000;
+}
+.custom-dropdown .options div {
+  padding: 8px;
+  cursor: pointer;
+}
+.custom-dropdown .options div:hover {
+  background: #f0f0f0;
+}
+@media (max-width: 768px) {
+  body { flex-direction: column; }
+  #map { width: 100%; height: 50vh; }
+  .sidebar { width: 100%; height: 50vh; box-shadow: none; }
+  .sidebar h3,
+  .custom-dropdown {
+    position: sticky;
+    top: 0;
+    background: #f9f9f9;
+    z-index: 10;
+    padding: 5px 0;
+    width: 100%;
+  }
+  #cards {
+    flex: 1;
+    overflow-y: auto;
+    width: 100%;
+  }
+  .custom-dropdown { max-width: 100%; }
+  .custom-dropdown .options { max-height: 150px; }
+}
+
+
+
+
+    .mahsa {
+        position: fixed;
+        bottom: 25px;
+        right: 25px;
+        border-radius: 50%;
+        z-index: 999;
+
+        .circle {
+            width: 180px;
+            height: 180px;
+
+            &::before,
+            &::after {
+                content: '';
+                width: 175px;
+                height: 175px;
+                position: absolute;
+                top: -5px;
+                left: -5px;
+                transition: 1s;
+                rotate: 10deg;
+            }
+
+            &::before {
+                background-color: gray;
+                border-radius: 30% 70% 35% 65% / 30% 36% 64% 70%;
+                z-index: -998;
+            }
+
+            &::after {
+                background-color: rgb(49, 49, 49);
+                border-radius: 64% 36% 61% 39% / 43% 36% 64% 57%;
+                z-index: -999;
+            }
+
+            >img {
+                width: 165px;
+                height: 165px;
+                border-radius: 50%;
+                object-fit: cover;
+                object-position: bottom;
+            }
+
+        }
+
+        &:hover {
+            >a {
+                >i {
+                    visibility: visible;
+                }
+            }
+
+            .circle {
+
+                &::before,
+                &::after {
+                    rotate: 45deg;
+                }
+            }
+        }
+
+        >a {
+            >i {
+                font-size: 28px;
+                color: black;
+                transition: .6s;
+                position: absolute;
+                visibility: hidden;
+
+                &:hover {
+                    color: #7e7e7e;
+                }
+            }
+
+            &:nth-of-type(1) {
+                >i {
+                    top: -5px;
+                    left: -30px;
+                }
+            }
+
+            &:nth-of-type(2) {
+                >i {
+                    top: 35px;
+                    left: -52px;
+                }
+            }
+
+            &:nth-of-type(3) {
+                >i {
+                    top: 85px;
+                    left: -52px;
+                }
+            }
+
+            &:nth-of-type(4) {
+                >i {
+                    top: 125px;
+                    left: -30px;
+                }
+            }
+        }
+    }
